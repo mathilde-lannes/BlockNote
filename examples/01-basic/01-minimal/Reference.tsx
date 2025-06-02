@@ -20,10 +20,11 @@ import {
   useHover,
   useInteractions,
 } from "@floating-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RiLink } from "react-icons/ri";
 
 import { BibliographyBlockConfig } from "./Bibliography.js";
+import { useOutsideClickHandler } from "./useOutsideClickHandler.js";
 
 const useFloatingHover = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -69,6 +70,7 @@ const useFloatingClick = () => {
 
   return {
     isOpen,
+    setIsOpen,
     referenceElementProps: {
       ref: refs.setReference,
       ...getReferenceProps(),
@@ -98,6 +100,11 @@ export const Reference = createReactInlineContentSpec(
       const referenceDetailsFloating = useFloatingHover();
       const referenceEditFloating = useFloatingClick();
 
+      const filePanelRef = useRef(null);
+      useOutsideClickHandler(filePanelRef, () => {
+        referenceEditFloating.setIsOpen(false);
+      });
+
       const citation = props.inlineContent.props;
 
       const [newDOI, setNewDOI] = useState(citation.doi);
@@ -120,6 +127,7 @@ export const Reference = createReactInlineContentSpec(
             </button>
             {referenceEditFloating.isOpen && (
               <Components.FilePanel.Root
+                ref={filePanelRef}
                 className={"bn-panel reference-panel"}
                 defaultOpenTab={"DOI"}
                 openTab={"DOI"}
